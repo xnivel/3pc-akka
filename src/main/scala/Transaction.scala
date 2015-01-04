@@ -12,12 +12,12 @@ class Transaction extends Actor {
   /**
    * Read value of object from server
    */
-  def read[T](p: Proxy[T]): T = ???
+  def read(p: Proxy): Integer = ???
 
   /**
    * Write value of object to local buffer (will be sent on commit)
    */
-  def write[T](p: Proxy[T], value: T): Unit = ???
+  def write(p: Proxy, value: Integer): Unit = ???
 }
 
 object Transaction {
