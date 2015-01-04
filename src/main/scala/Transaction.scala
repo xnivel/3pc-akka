@@ -1,9 +1,11 @@
 import akka.actor.Actor
 import akka.pattern.ask
+import akka.util.Timeout
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
 class Transaction extends Actor {
+  implicit val timeout = Timeout(5 seconds)
   var buffer: Map[Proxy, Integer] = Map()
 
   def receive = {
@@ -12,9 +14,10 @@ class Transaction extends Actor {
 
   def commit = {
     val coordinator = context.actorSelection("coordinator")
-    coordinator ? CommitRequest(buffer) andThen {
-      case Commit => println("Commited")
-      case Abort => throw new Exception("Got abort!")
+    val future = coordinator ? CommitRequest(buffer)
+    Await.result(future, timeout.duration) match {
+      case Commit() => println("Commited")
+      case Abort() => throw new Exception("Got abort!")
     }
   }
 
@@ -28,7 +31,7 @@ class Transaction extends Actor {
   def read(p: Proxy): Integer = {
     val server = context.actorSelection(p.serverId)
     val future = server ? Read(p.variableId)
-    Await.result(future, 5 seconds).asInstanceOf[Integer]
+    Await.result(future, timeout.duration).asInstanceOf[Integer]
   }
 
   /**
