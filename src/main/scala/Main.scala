@@ -21,15 +21,13 @@ object Main extends App {
   // Create new actor reference (proxy).
   val server1 = system.actorOf(Props(new Server(Map("c"->2))), "Server1")
 
-
-  val future = server1 ? ("read","c")
+  val future = server1 ? new Read("c")
   val result = Await.result(future, timeout.duration).asInstanceOf[Int]
   println(""+result)
 
-  server1 ! ("write","c",12)
+  server1 ! new Write("c",12)
 
-  val future2 = server1 ? ("read","c")
+  val future2 = server1 ? new Read("c")
   val result2 = Await.result(future2, timeout.duration).asInstanceOf[Int]
   println(""+result2)
-
 }

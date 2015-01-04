@@ -5,25 +5,13 @@ class Server(var objects: Map[String, Integer]) extends Actor {
     case (name: String) => {
       println("received a message "+name)
     }
-    case (command: String, variablename: String) => {
-//      println("received a command "+command+ " variablename "+variablename)
-      command match {
-        case "read" => {
-//          println("r"+ (objects get variablename get))
-          sender ! (objects get variablename get)
-        }
-        case _ =>{}
-      }
+    case (msg: Read) => {
+      sender ! (objects get msg.id get)
     }
-    case (command: String, variablename: String,variable: Integer) => {
-//      println("received a command "+command+ " variablename "+variablename+" variablevalue "+variable)
-      command match {
-        case "write" => {
-          objects = objects.updated(variablename, variable)
-        }
-        case _ =>{}
-      }
+    case (msg: Write) => {
+      objects = objects.updated(msg.id, msg.newVal);
     }
+
     case _ => println("received a message")
   }
 }
