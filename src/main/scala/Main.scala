@@ -14,9 +14,7 @@ object Main extends App {
 
   // Create new actor reference (proxy).
   val server1 = system.actorOf(Props(new Server(Map("c"->1))), "Server1")
-  val client1 = system.actorOf(Props(new Client()), "Client1")
 
   server1 ! 10
-
 
 }
