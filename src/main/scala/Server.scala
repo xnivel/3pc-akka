@@ -3,7 +3,11 @@ import akka.actor.ReceiveTimeout
 import scala.concurrent.duration._
 
 class Server(var objects: Map[String, Integer]) extends Actor {
-  context.setReceiveTimeout(100 milliseconds)
+  context.setReceiveTimeout(Duration.Undefined)
+  def unbecome() = {
+    context.setReceiveTimeout(Duration.Undefined)
+    context.unbecome();
+  }
 
   def waiting: Receive = {
 
@@ -11,10 +15,10 @@ class Server(var objects: Map[String, Integer]) extends Actor {
       context.become(prepared);
     }
     case Abort => {
-      context.unbecome();
+      unbecome()
     }
     case ReceiveTimeout => {
-      context.unbecome();
+      unbecome()
     }
     case _ => {
 
@@ -22,13 +26,13 @@ class Server(var objects: Map[String, Integer]) extends Actor {
   }
   def prepared: Receive = {
     case DoCommit => {
-      context.unbecome();
+      unbecome()
     }
     case Abort => {
-      context.unbecome();
+      unbecome()
     }
     case ReceiveTimeout => {
-      context.unbecome();
+      unbecome()
     }
     case _ => {
 
@@ -45,9 +49,13 @@ class Server(var objects: Map[String, Integer]) extends Actor {
       objects = objects.updated(msg.id, msg.newVal);
     }
     case CanCommit => {
+      context.setReceiveTimeout(100 milliseconds)
       context.become(waiting);
     }
+    case ReceiveTimeout => {
+      println("received a aaaaaaaaaaaaaaa")
+    }
 
-    case _ => println("received a message")
+    case _ => println("received a messagae")
   }
 }
