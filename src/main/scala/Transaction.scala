@@ -1,19 +1,16 @@
-import akka.actor.Actor
+import akka.actor.ActorRef
+import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.util.Timeout
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class Transaction extends Actor {
+class Transaction(val system: ActorSystem) {
   implicit val timeout = Timeout(5 seconds)
   var buffer: Map[Proxy, Integer] = Map()
-
-  def receive = {
-    case _ => println("received a message")
-  }
-
+  
   def commit = {
-    val coordinator = context.actorSelection("coordinator")
+    val coordinator = system.actorSelection("coordinator")
     val future = coordinator ? CommitRequest(buffer)
     Await.result(future, timeout.duration) match {
       case Commit() => println("Commited")
@@ -29,7 +26,7 @@ class Transaction extends Actor {
    * Read value of object from server
    */
   def read(p: Proxy): Integer = {
-    val server = context.actorSelection(p.serverId)
+    val server = system.actorSelection(p.serverId)
     val future = server ? Read(p.variableId)
     Await.result(future, timeout.duration).asInstanceOf[Integer]
   }
@@ -48,14 +45,18 @@ object Transaction {
    *
    * import Transaction.transaction
    *
+   * val system = ActorSystem("MySystem")
+   * val client = system.actorOf(Props(new Client()), "client1")
    * val v = new Proxy("serverId", "variableId")
-   * transaction { tx =>
+   * transaction(system, client, List(v)) { tx =>
    *   val x = tx.read(v)
    *   tx.write(v, x + 1)
    * }
    */
-  def transaction(codeBlock: Transaction => Unit): Unit = {
-    val tx = new Transaction
+  def transaction(system: ActorSystem, client: ActorRef, objects: Set[Proxy])
+                 (codeBlock: Transaction => Unit): Unit = {
+    client ! RegisterTransaction(objects)
+    val tx = new Transaction(system)
     try {
       codeBlock(tx)
       tx.commit
