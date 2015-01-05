@@ -1,4 +1,4 @@
 /**
  * Holds information about a remote Shared object
  */
-case class Proxy(val serverId: String, val variableId: String)
+case class Proxy(serverId: String, variableId: String)
