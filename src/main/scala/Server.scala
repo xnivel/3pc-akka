@@ -1,9 +1,20 @@
 import akka.actor.Actor
+import akka.actor.ReceiveTimeout
+import scala.concurrent.duration._
 
 class Server(var objects: Map[String, Integer]) extends Actor {
+  context.setReceiveTimeout(100 milliseconds)
+
   def waiting: Receive = {
+
     case PreCommit => {
       context.become(prepared);
+    }
+    case Abort => {
+      context.unbecome();
+    }
+    case ReceiveTimeout => {
+      context.unbecome();
     }
     case _ => {
 
@@ -11,6 +22,12 @@ class Server(var objects: Map[String, Integer]) extends Actor {
   }
   def prepared: Receive = {
     case DoCommit => {
+      context.unbecome();
+    }
+    case Abort => {
+      context.unbecome();
+    }
+    case ReceiveTimeout => {
       context.unbecome();
     }
     case _ => {
