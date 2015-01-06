@@ -5,7 +5,7 @@ import scala.concurrent.Await
 import akka.pattern.ask
 import akka.util.Timeout
 import scala.concurrent.duration._
-
+import Transaction.transaction
 
 object Main extends App {
 
@@ -31,4 +31,12 @@ object Main extends App {
 //  val future2 = server1 ? new Read("c")
 //  val result2 = Await.result(future2, timeout.duration).asInstanceOf[Int]
 //  println(""+result2)
+
+  val v = Proxy("Server1", "c")
+  transaction(system) { tx =>
+    val x = tx.read(v)
+    println(x)
+    tx.write(v, 5)
+    println("wrote 5")
+  }
 }
