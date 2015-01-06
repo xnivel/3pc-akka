@@ -5,12 +5,11 @@ import akka.util.Timeout
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class Transaction(val system: ActorSystem) {
+class Transaction(val system: ActorSystem, val coordinator: ActorRef) {
   implicit val timeout = Timeout(5 seconds)
   var buffer: Map[Proxy, Shared[Integer]] = Map()
   
   def commit = {
-    val coordinator = system.actorSelection("coordinator")
     val future = coordinator ? CommitRequest(buffer)
     Await.result(future, timeout.duration) match {
       case Commit() => println("Commited")
@@ -56,8 +55,9 @@ object Transaction {
    *   tx.write(v, x + 1)
    * }
    */
-  def transaction(system: ActorSystem)(codeBlock: Transaction => Unit): Unit = {
-    val tx = new Transaction(system)
+  def transaction(system: ActorSystem, coordinator: ActorRef)
+                 (codeBlock: Transaction => Unit): Unit = {
+    val tx = new Transaction(system, coordinator)
     var success = false
     while (!success) {
       try {
