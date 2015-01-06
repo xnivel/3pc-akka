@@ -56,8 +56,7 @@ object Transaction {
    *   tx.write(v, x + 1)
    * }
    */
-  def transaction(system: ActorSystem, objects: Set[Proxy])
-                 (codeBlock: Transaction => Unit): Unit = {
+  def transaction(system: ActorSystem)(codeBlock: Transaction => Unit): Unit = {
     val tx = new Transaction(system)
     var success = false
     while (!success) {
