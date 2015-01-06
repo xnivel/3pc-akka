@@ -11,6 +11,7 @@ class CoordinatorChild extends Actor {
 
   def waiting: Receive = {
     case Yes => {
+      println("dostalem yes")
       serverChildren = serverChildren + sender()
       if (serverChildren.size == servers.size)
         context.become(prepared)
@@ -49,7 +50,7 @@ class CoordinatorChild extends Actor {
       val serverIds: Set[String] = objects.keys.map(o => o.serverId).toSet
       servers = serverIds.map(id => context.actorSelection(id))
       servers.foreach(s => s ! CanCommit(objects.toSet))
-      context.setReceiveTimeout(100 milliseconds)
+      context.setReceiveTimeout(500 milliseconds)
       context.become(waiting)
     }
   }
