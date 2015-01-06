@@ -7,7 +7,7 @@ class Server(var objects: Map[String, (Shared[Integer],Boolean)]) extends Actor 
       println("received a message "+name)
     }
     case (msg: Read) => {
-      sender ! (objects get msg.id get)
+      sender ! (objects(msg.id)._1)
     }
     case (msg: WriteCommit) => {
       objects = msg.objects.foldLeft(objects)((result: Map[String, (Shared[Integer],Boolean)],elem:(Proxy,Shared[Integer]))=>{
