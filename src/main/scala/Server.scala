@@ -32,10 +32,7 @@ class Server(var objects: Map[String, (Shared[Integer],Boolean)]) extends Actor 
       val idOfVariable=elem._1.variableId
       if(result!=true&&objects.contains(idOfVariable))
       {
-        if((!objects(idOfVariable)._2)&&(objects(idOfVariable)._1.version<elem._2.version))
-          false
-        else
-          true
+        !((!objects(idOfVariable)._2)&&(objects(idOfVariable)._1.version<elem._2.version))
       }
       else
         result
@@ -48,7 +45,7 @@ class Server(var objects: Map[String, (Shared[Integer],Boolean)]) extends Actor 
           else
             result
         })
-        val child = context.actorOf(Props(classOf[ServerChild], ""))
+        val child = context.actorOf(Props(new ServerChild(msg.objects,this)), "")
         child forward CanCommit
       }else{
         sender ! new No

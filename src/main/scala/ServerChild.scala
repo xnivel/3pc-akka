@@ -1,27 +1,39 @@
 /**
  * Created by xnivel on 06.01.15.
  */
-import akka.actor.Actor
-import akka.actor.ReceiveTimeout
+import akka.actor.{ActorRef, Actor, ReceiveTimeout}
 import scala.concurrent.duration._
 
-class ServerChild extends Actor {
+class ServerChild(sendedObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) extends Actor {
+  //val objects: Set[(Proxy,Shared[Integer])]=sendedObjects;
   context.setReceiveTimeout(Duration.Undefined)
   def unbecome() = {
     context.setReceiveTimeout(Duration.Undefined)
     context.unbecome();
   }
+  def Aborting() = {
+    val Proxylist= sendedObjects.foldLeft(Set[Proxy]())((result: Set[Proxy],elem:(Proxy,Shared[Integer]))=>{
+      result+elem._1
+    })
+    server ! new AbortWithList(Proxylist)
+  }
+  def Commiting()={
+    server ! new WriteCommit(sendedObjects)
+  }
 
   def waiting: Receive = {
 
     case PreCommit => {
+      sender ! (Ack)
       context.become(prepared);
     }
     case Abort => {
       unbecome()
+      Aborting()
     }
     case ReceiveTimeout => {
       unbecome()
+      Aborting()
     }
     case _ => {
 
@@ -30,12 +42,15 @@ class ServerChild extends Actor {
   def prepared: Receive = {
     case DoCommit => {
       unbecome()
+      Commiting()
     }
     case Abort => {
       unbecome()
+      Aborting()
     }
     case ReceiveTimeout => {
       unbecome()
+      Aborting()
     }
     case _ => {
 
@@ -45,7 +60,8 @@ class ServerChild extends Actor {
     case (name: String) => {
       println("received a message "+name)
     }
-    case CanCommit => {
+    case (msg:CanCommit) => {
+
       sender ! (Yes)
       context.setReceiveTimeout(100 milliseconds)
       context.become(waiting);
