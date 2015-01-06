@@ -34,8 +34,9 @@ object Main extends App {
 //  val result2 = Await.result(future2, timeout.duration).asInstanceOf[Int]
 //  println(""+result2)
 
+  val coordinator = system.actorOf(Props[Coordinator])
   val v = Proxy(server1.path.toString, "c")
-  transaction(system) { tx =>
+  transaction(system, coordinator) { tx =>
     val x = tx.read(v)
     println(x)
     tx.write(v, 5)
