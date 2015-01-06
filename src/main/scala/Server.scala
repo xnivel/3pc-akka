@@ -45,7 +45,7 @@ class Server(var objects: Map[String, (Shared[Integer],Boolean)]) extends Actor 
           else
             result
         })
-        val child = context.actorOf(Props(new ServerChild(msg.objects,this)), "")
+        val child = context.actorOf(Props(new ServerChild(msg.objects,context.self)), "")
         child forward CanCommit
       }else{
         sender ! new No
