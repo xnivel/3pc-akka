@@ -12,3 +12,6 @@ case class DoCommit() extends Message
 case class Yes() extends Message
 case class No() extends Message
 case class Ack() extends Message
+
+case class WriteCommit(objects: Set[Proxy])
+case class Idle()
