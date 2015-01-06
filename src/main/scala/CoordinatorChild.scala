@@ -13,8 +13,10 @@ class CoordinatorChild extends Actor {
     case Yes => {
       println("dostalem yes")
       serverChildren = serverChildren + sender()
-      if (serverChildren.size == servers.size)
+      if (serverChildren.size == servers.size) {
+        serverChildren.foreach(c => c ! PreCommit())
         context.become(prepared)
+      }
     }
     case No => {
       requester ! Abort()
