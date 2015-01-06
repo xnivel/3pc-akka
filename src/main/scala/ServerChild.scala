@@ -12,6 +12,7 @@ class ServerChild(sendedObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) e
     context.unbecome();
   }
   def Aborting() = {
+    println("send a AbortWithList")
     val Proxylist= sendedObjects.foldLeft(Set[Proxy]())((result: Set[Proxy],elem:(Proxy,Shared[Integer]))=>{
       result+elem._1
     })
@@ -34,6 +35,7 @@ class ServerChild(sendedObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) e
       Aborting()
     }
     case ReceiveTimeout => {
+      println("timeout1")
       unbecome()
       Aborting()
     }
@@ -72,6 +74,6 @@ class ServerChild(sendedObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) e
       println("received a aaaaaaaaaaaaaaa")
     }
 
-    case _ => println("received a messagae")
+    case _ => println("received a messagaes")
   }
 }

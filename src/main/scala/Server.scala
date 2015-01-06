@@ -19,6 +19,7 @@ class Server(var objects: Map[String, (Shared[Integer],Boolean)]) extends Actor 
       })
     }
     case (msg: AbortWithList) => {
+      println("received a AbortWithList")
       objects = msg.objects.foldLeft(objects)((result: Map[String, (Shared[Integer],Boolean)],elem:Proxy)=>{
         val idOfVariable=elem.variableId
         if(objects.contains(idOfVariable))
@@ -45,8 +46,8 @@ class Server(var objects: Map[String, (Shared[Integer],Boolean)]) extends Actor 
           else
             result
         })
-        val child = context.actorOf(Props(new ServerChild(msg.objects,context.self)), "")
-        child forward CanCommit
+        val child = context.actorOf(Props(new ServerChild(msg.objects,context.self)))
+        child forward msg
       }else{
         sender ! new No
       }

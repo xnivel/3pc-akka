@@ -25,6 +25,8 @@ object Main extends App {
   val future = server1 ? new Read("c")
   val result = Await.result(future, timeout.duration).asInstanceOf[Shared[Integer]]
   println(""+result.value)
+
+  server1 ! new CanCommit(Set((new Proxy("c","c"),new Shared[Integer](3,1))))
 //
 //  server1 ! new Write("c",12)
 //
