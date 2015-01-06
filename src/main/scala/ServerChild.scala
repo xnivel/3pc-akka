@@ -16,9 +16,11 @@ class ServerChild(sendedObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) e
       result+elem._1
     })
     server ! new AbortWithList(Proxylist)
+    context.stop(self)
   }
   def Commiting()={
     server ! new WriteCommit(sendedObjects)
+    context.stop(self)
   }
 
   def waiting: Receive = {
