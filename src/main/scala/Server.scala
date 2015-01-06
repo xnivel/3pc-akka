@@ -9,15 +9,23 @@ class Server(var objects: Map[String, (Shared[Integer],Boolean)]) extends Actor 
     case (msg: Read) => {
       sender ! (objects get msg.id get)
     }
-//      Raczej i tak nie powinna taka wiadomosc docierac
-//      czysto do testow
-//      obecnie nic ciekawego
-//    case (msg: Write) => {
-//      objects = objects.updated(msg.id, new Shared[Integer](msg.newVal,1));
-//    }
     case (msg: WriteCommit) => {
-      println("received a docommit")
-//      objects = objects.updated(msg.id, new Shared[Integer](msg.newVal,1));
+      objects = msg.objects.foldLeft(objects)((result: Map[String, (Shared[Integer],Boolean)],elem:(Proxy,Shared[Integer]))=>{
+        val idOfVariable=elem._1.variableId
+        if(objects.contains(idOfVariable))
+          result.updated(idOfVariable,(elem._2,false))
+        else
+          result
+      })
+    }
+    case (msg: AbortWithList) => {
+      objects = msg.objects.foldLeft(objects)((result: Map[String, (Shared[Integer],Boolean)],elem:Proxy)=>{
+        val idOfVariable=elem.variableId
+        if(objects.contains(idOfVariable))
+          result.updated(idOfVariable,(result(idOfVariable)._1,false))
+        else
+          result
+      })
     }
     case (msg: CanCommit) => {
       val needToAbort = msg.objects.foldLeft(false)((result: Boolean,elem:(Proxy,Shared[Integer])) => {
@@ -45,9 +53,6 @@ class Server(var objects: Map[String, (Shared[Integer],Boolean)]) extends Actor 
       }else{
         sender ! new No
       }
-    }
-    case ReceiveTimeout => {
-      println("received a aaaaaaaaaaaaaaa")
     }
 
     case _ => println("received a messagae")
