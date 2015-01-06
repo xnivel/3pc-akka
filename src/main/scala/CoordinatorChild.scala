@@ -8,11 +8,6 @@ class CoordinatorChild(val clients: Set[ActorRef]) extends Actor {
 
   context.setReceiveTimeout(Duration.Undefined)
 
-  def unbecome() = {
-    context.setReceiveTimeout(Duration.Undefined)
-    context.unbecome()
-  }
-
   def waiting: Receive = {
     case Yes => {
       clientChildren = clientChildren + sender()
@@ -20,10 +15,14 @@ class CoordinatorChild(val clients: Set[ActorRef]) extends Actor {
         context.become(prepared)
     }
     case No => {
-      unbecome()
+      requester ! Abort()
+      clientChildren.foreach(c => c ! Abort())
+      context.stop(self)
     }
     case ReceiveTimeout => {
-      unbecome()
+      requester ! Abort()
+      clientChildren.foreach(c => c ! Abort())
+      context.stop(self)
     }
   }
 
@@ -33,11 +32,13 @@ class CoordinatorChild(val clients: Set[ActorRef]) extends Actor {
       if (ackCounter == clientChildren.size) {
         requester ! Commit()
         clientChildren.foreach(c => c ! Commit())
-        unbecome()
+        context.stop(self)
       }
     }
     case ReceiveTimeout => {
-      unbecome()
+      requester ! Abort()
+      clientChildren.foreach(c => c ! Abort())
+      context.stop(self)
     }
   }
 
