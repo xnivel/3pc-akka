@@ -61,13 +61,17 @@ object Transaction {
                  (codeBlock: Transaction => Unit): Unit = {
     client ! RegisterTransaction(objects)
     val tx = new Transaction(system)
-    try {
-      codeBlock(tx)
-      tx.commit
-    } catch {
-      case ex: Throwable => {
-        tx.abort
-        throw ex
+    var success = false
+    while (!success) {
+      try {
+        codeBlock(tx)
+        tx.commit
+        success = true
+      } catch {
+        case ex: Throwable => {
+          tx.abort
+          throw ex
+        }
       }
     }
   }
