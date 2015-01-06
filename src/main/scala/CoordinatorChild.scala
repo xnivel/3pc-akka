@@ -45,7 +45,7 @@ class CoordinatorChild extends Actor {
 
   def receive = {
     case CommitRequest(objects) => {
-      val requester = sender()
+      requester = sender()
       val serverIds: Set[String] = objects.keys.map(o => o.serverId).toSet
       servers = serverIds.map(id => context.actorSelection(id))
       servers.foreach(s => s ! CanCommit(objects.toSet))
