@@ -45,16 +45,8 @@ class ServerChild extends Actor {
     case (name: String) => {
       println("received a message "+name)
     }
-    case (msg: Read) => {
-      sender ! (objects get msg.id get)
-    }
-    //      Raczej i tak nie powinna taka wiadomosc docierac
-    //      czysto do testow
-    //      obecnie nic ciekawego
-    case (msg: Write) => {
-      objects = objects.updated(msg.id, new Shared[Integer](msg.newVal,1));
-    }
     case CanCommit => {
+      sender ! (Yes)
       context.setReceiveTimeout(100 milliseconds)
       context.become(waiting);
     }
