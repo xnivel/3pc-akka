@@ -1,45 +1,11 @@
-import akka.actor.{ReceiveTimeout, Actor}
+import akka.actor.{Props, Actor, ActorRef}
 
-import scala.concurrent.duration._
+class Coordinator(val clients: Set[ActorRef]) extends Actor {
 
-
-class Coordinator extends Actor {
-  context.setReceiveTimeout(Duration.Undefined)
-  def unbecome() = {
-    context.setReceiveTimeout(Duration.Undefined)
-    context.unbecome();
-  }
-
-  def waiting: Receive = {
-
-    case Yes => {
-      context.become(prepared);
-    }
-    case No => {
-      unbecome()
-    }
-    case ReceiveTimeout => {
-      unbecome()
-    }
-    case _ => {
-
-    }
-  }
-  def prepared: Receive = {
-    case Ack => {
-      unbecome()
-    }
-    case ReceiveTimeout => {
-      unbecome()
-    }
-    case _ => {
-
-    }
-  }
   def receive = {
-    case Commit => {
-      context.setReceiveTimeout(100 milliseconds)
-      context.become(waiting);
+    case CommitRequest(objects) => {
+      val child = context.actorOf(Props(classOf[CoordinatorChild], clients))
+      child forward CommitRequest(objects)
     }
     case _ => println("received a message")
   }

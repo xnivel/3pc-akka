@@ -11,7 +11,7 @@ class Transaction(val system: ActorSystem) {
   
   def commit = {
     val coordinator = system.actorSelection("coordinator")
-    val future = coordinator ? CommitRequest(buffer)
+    val future = coordinator ? CommitRequest(buffer.keys.toSet)
     Await.result(future, timeout.duration) match {
       case Commit() => println("Commited")
       case Abort() => throw new Exception("Got abort!")
