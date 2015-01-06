@@ -14,6 +14,7 @@ class CoordinatorChild extends Actor {
       println("dostalem yes")
       serverChildren = serverChildren + sender()
       if (serverChildren.size == servers.size) {
+        println("poslalem precommit")
         serverChildren.foreach(c => c ! PreCommit())
         context.become(prepared)
       }

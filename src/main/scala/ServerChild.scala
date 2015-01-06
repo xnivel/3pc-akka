@@ -26,7 +26,7 @@ class ServerChild(sendedObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) e
 
   def waiting: Receive = {
 
-    case PreCommit => {
+    case (msg: PreCommit) => {
       sender ! (Ack)
       context.become(prepared);
     }
@@ -39,12 +39,14 @@ class ServerChild(sendedObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) e
       unbecome()
       Aborting()
     }
-    case _ => {
+    case (msg: Any) => {
+      println("dostalemcos1 "+msg)
 
     }
   }
   def prepared: Receive = {
-    case DoCommit => {
+    case DoCommit() => {
+      println("recDoCommit")
       unbecome()
       Commiting()
     }
@@ -56,8 +58,8 @@ class ServerChild(sendedObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) e
       unbecome()
       Aborting()
     }
-    case _ => {
-
+    case (msg: Any) => {
+      println("dostalemcos2 "+msg)
     }
   }
   def receive = {
