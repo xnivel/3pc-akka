@@ -33,6 +33,13 @@ class Server(var objects: Map[String, (Shared[Integer],Boolean)]) extends Actor 
         result
     })
       if(!needToAbort){
+        objects = msg.objects.foldLeft(objects)((result: Map[String, (Shared[Integer],Boolean)],elem:(Proxy,Shared[Integer]))=>{
+          val idOfVariable=elem._1.variableId
+          if(objects.contains(idOfVariable))
+            result.updated(idOfVariable,(result(idOfVariable)._1,true))
+          else
+            result
+        })
         val child = context.actorOf(Props(classOf[ServerChild], ""))
         child forward CanCommit
       }else{
