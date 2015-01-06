@@ -26,7 +26,9 @@ object Main extends App {
   val result = Await.result(future, timeout.duration).asInstanceOf[Shared[Integer]]
   println(""+result.value)
 
-  server1 ! new CanCommit(Set((new Proxy("c","c"),new Shared[Integer](3,1))))
+//  val future2 = server1 ? new CanCommit(Set((new Proxy("c","c"),new Shared[Integer](3,1))))
+//  val result2 = Await.result(future2, timeout.duration).asInstanceOf[Yes]
+//
 //
 //  server1 ! new Write("c",12)
 //
