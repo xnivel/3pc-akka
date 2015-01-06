@@ -6,8 +6,6 @@ case class Commit() extends Message
 case class Abort() extends Message
 case class AbortWithList(objects: Set[Proxy]) extends Message
 case class CanCommit(objects: Set[(Proxy,Shared[Integer])])
-case class RegisterTransaction(objects: Set[Proxy])
-
 case class PreCommit() extends Message
 case class DoCommit() extends Message
 case class Yes() extends Message

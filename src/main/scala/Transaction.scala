@@ -50,16 +50,14 @@ object Transaction {
    * import Transaction.transaction
    *
    * val system = ActorSystem("MySystem")
-   * val client = system.actorOf(Props(new Client()), "client1")
    * val v = Proxy("serverId", "variableId")
-   * transaction(system, client, List(v)) { tx =>
+   * transaction(system) { tx =>
    *   val x = tx.read(v)
    *   tx.write(v, x + 1)
    * }
    */
-  def transaction(system: ActorSystem, client: ActorRef, objects: Set[Proxy])
+  def transaction(system: ActorSystem, objects: Set[Proxy])
                  (codeBlock: Transaction => Unit): Unit = {
-    client ! RegisterTransaction(objects)
     val tx = new Transaction(system)
     var success = false
     while (!success) {
