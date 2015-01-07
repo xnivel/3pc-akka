@@ -6,6 +6,8 @@ import akka.pattern.ask
 import akka.util.Timeout
 import scala.concurrent.duration._
 import Transaction.transaction
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object Main extends App {
 
@@ -38,10 +40,12 @@ object Main extends App {
 
   val coordinator = system.actorOf(Props[Coordinator])
   val v = Proxy(server1.path.toString, "c")
-  transaction(system, coordinator) { tx =>
+  val txBlock = () => transaction(system, coordinator) { tx =>
     val x = tx.read(v)
     println(x)
     tx.write(v, 5)
     println("wrote 5")
   }
+  Future { txBlock() }
+  Future { txBlock() }
 }
