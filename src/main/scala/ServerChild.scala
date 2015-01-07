@@ -4,7 +4,7 @@
 import akka.actor.{ActorRef, Actor, ReceiveTimeout}
 import scala.concurrent.duration._
 
-class ServerChild(sendedObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) extends Actor {
+class ServerChild(sentObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) extends Actor {
   //val objects: Set[(Proxy,Shared[Integer])]=sendedObjects;
   context.setReceiveTimeout(Duration.Undefined)
   def unbecome() = {
@@ -13,14 +13,12 @@ class ServerChild(sendedObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) e
   }
   def Aborting() = {
     println("send a AbortWithList")
-    val Proxylist= sendedObjects.foldLeft(Set[Proxy]())((result: Set[Proxy],elem:(Proxy,Shared[Integer]))=>{
-      result+elem._1
-    })
-    server ! new AbortWithList(Proxylist)
+    val proxyList = sentObjects.map(o => o._1)
+    server ! new AbortWithList(proxyList)
     context.stop(self)
   }
   def Commiting()={
-    server ! new WriteCommit(sendedObjects)
+    server ! new WriteCommit(sentObjects)
     context.stop(self)
   }
 
