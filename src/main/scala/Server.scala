@@ -49,7 +49,7 @@ class Server(var objects: Map[String, (Shared[Integer],Boolean)]) extends Actor 
         val child = context.actorOf(Props(new ServerChild(msg.objects,context.self)))
         child forward msg
       }else{
-        sender ! new No
+        sender ! No()
       }
     }
 
