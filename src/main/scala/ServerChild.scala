@@ -28,7 +28,7 @@ class ServerChild(sentObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) ext
       sender ! (Ack)
       context.become(prepared);
     }
-    case Abort => {
+    case Abort() => {
       unbecome()
       Aborting()
     }

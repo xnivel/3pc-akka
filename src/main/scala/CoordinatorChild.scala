@@ -10,7 +10,7 @@ class CoordinatorChild extends Actor {
   context.setReceiveTimeout(Duration.Undefined)
 
   def waiting: Receive = {
-    case Yes => {
+    case Yes() => {
       println("dostalem yes")
       serverChildren = serverChildren + sender()
       if (serverChildren.size == servers.size) {
@@ -19,7 +19,7 @@ class CoordinatorChild extends Actor {
         context.become(prepared)
       }
     }
-    case No => {
+    case No() => {
       requester ! Abort()
       serverChildren.foreach(c => c ! Abort())
       context.stop(self)
@@ -32,7 +32,7 @@ class CoordinatorChild extends Actor {
   }
 
   def prepared: Receive = {
-    case Ack => {
+    case Ack() => {
       ackCounter += 1
       if (ackCounter == serverChildren.size) {
         requester ! Commit()
