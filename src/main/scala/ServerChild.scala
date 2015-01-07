@@ -25,7 +25,7 @@ class ServerChild(sentObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) ext
   def waiting: Receive = {
 
     case (msg: PreCommit) => {
-      sender ! (Ack)
+      sender ! Ack()
       context.become(prepared);
     }
     case Abort() => {
@@ -66,7 +66,7 @@ class ServerChild(sentObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) ext
     }
     case (msg:CanCommit) => {
 
-      sender ! (Yes)
+      sender ! Yes()
       context.setReceiveTimeout(500 milliseconds)
       context.become(waiting);
     }
