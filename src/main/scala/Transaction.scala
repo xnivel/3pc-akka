@@ -67,7 +67,6 @@ object Transaction {
       } catch {
         case ex: Throwable => {
           tx.abort
-          throw ex
         }
       }
     }
