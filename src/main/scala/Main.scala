@@ -22,11 +22,9 @@ object Main extends App {
   val system = ActorSystem("ItsTheFinalCountdown")
 
   // Create new actor reference (proxy).
-  val map=Map("c"->((new Shared[Integer](2,0)),false));
-  val server1 = system.actorOf(Props(new Server(map)), "Server1")
+  val server1 = system.actorOf(Props(new Server()), "Server1")
 
-  val map2=Map("d"->((new Shared[Integer](1,0)),false));
-  val server2 = system.actorOf(Props(new Server(map2)), "Server2")
+  val server2 = system.actorOf(Props(new Server()), "Server2")
 
   val future = server1 ? new Read("c")
   val result = Await.result(future, timeout.duration).asInstanceOf[Shared[Integer]]
