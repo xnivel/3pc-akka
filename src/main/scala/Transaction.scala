@@ -2,6 +2,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.util.Timeout
+import scala.annotation.tailrec
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
@@ -55,19 +56,17 @@ object Transaction {
    *   tx.write(v, x + 1)
    * }
    */
+  @tailrec
   def transaction(system: ActorSystem, coordinator: ActorRef)
                  (codeBlock: Transaction => Unit): Unit = {
     val tx = new Transaction(system, coordinator)
-    var success = false
-    while (!success) {
-      try {
-        codeBlock(tx)
-        tx.commit
-        success = true
-      } catch {
-        case ex: Throwable => {
-          tx.abort
-        }
+    try {
+      codeBlock(tx)
+      tx.commit
+    } catch {
+      case ex: Throwable => {
+        tx.abort
+        transaction(system, coordinator)(codeBlock)
       }
     }
   }
