@@ -1,6 +1,7 @@
 import akka.actor.Actor
 import akka.actor.ActorSystem
 import akka.actor.Props
+import com.typesafe.config.ConfigFactory
 import scala.concurrent.Await
 import akka.pattern.ask
 import akka.util.Timeout
