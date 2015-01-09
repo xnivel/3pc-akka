@@ -4,7 +4,7 @@ case class Write(id: String,newVal: Integer) extends Message
 case class CommitRequest(objects: Map[Proxy, Shared[Integer]]) extends Message
 case class Commit() extends Message
 case class Abort() extends Message
-case class AbortWithList(objects: Set[Proxy]) extends Message
+case class AbortWithList(objects: Set[(Proxy,Shared[Integer])]) extends Message
 case class CanCommit(objects: Set[(Proxy,Shared[Integer])])
 case class PreCommit() extends Message
 case class DoCommit() extends Message

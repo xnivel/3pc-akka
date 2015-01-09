@@ -13,8 +13,8 @@ class ServerChild(sentObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) ext
   }
   def Aborting() = {
     println("send a AbortWithList")
-    val proxyList = sentObjects.map(o => o._1)
-    server ! new AbortWithList(proxyList)
+    //val proxyList = sentObjects.map(o => o._1)
+    server ! new AbortWithList(sentObjects)
     context.stop(self)
   }
   def Commiting()={
