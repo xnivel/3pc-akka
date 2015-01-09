@@ -19,14 +19,12 @@ object Main extends App {
   //pierwsze bajery
 
   // Create actor system.
-  val system = ActorSystem("ItsTheFinalCountdown")
+  val system = ActorSystem("Main")
+  val coordinator = system.actorSelection("akka.tcp://CoordinatorSystem@127.0.0.1:9000/user/coordinator")
+  val server1Path = "akka.tcp://ServerSystem@127.0.0.1:9001/user/server1"
+  val server2Path = "akka.tcp://ServerSystem@127.0.0.1:9002/user/server2"
 
-  // Create new actor reference (proxy).
-  val map=Map("c"->((new Shared[Integer](2,0)),false));
-  val server1 = system.actorOf(Props(new Server(map)), "Server1")
-
-  val map2=Map("d"->((new Shared[Integer](1,0)),false));
-  val server2 = system.actorOf(Props(new Server(map2)), "Server2")
+  val server1 = system.actorSelection(server1Path)
 
   val future = server1 ? new Read("c")
   val result = Await.result(future, timeout.duration).asInstanceOf[Shared[Integer]]
@@ -42,9 +40,8 @@ object Main extends App {
 //  val result2 = Await.result(future2, timeout.duration).asInstanceOf[Int]
 //  println(""+result2)
 
-  val coordinator = system.actorOf(Props[Coordinator])
-  val v = Proxy(server1.path.toString, "c")
-  val u = Proxy(server2.path.toString, "d")
+  val v = Proxy(server1Path, "c")
+  val u = Proxy(server2Path, "d")
   val txBlock = () => transaction(system, coordinator) { tx =>
     val x = tx.read(v)
     val y = tx.read(u)
