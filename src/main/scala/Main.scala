@@ -8,8 +8,6 @@ import scala.concurrent.duration._
 import Transaction.transaction
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import akka.actor.Deploy
-import akka.remote.RemoteActorRefProvider
 
 object Main extends App {
 
@@ -20,21 +18,14 @@ object Main extends App {
   //pierwsze bajery
 
   // Create actor system.
-//  val system = ActorSystem("ItsTheFinalCountdown")
-
-  val system = ActorSystem("LocalSystem")
-
+  val system = ActorSystem("ItsTheFinalCountdown")
 
   // Create new actor reference (proxy).
-//  val map=Map("c"->((new Shared[Integer](2,0)),false));
-//  val server1 = system.actorOf(Props(new Server(map)), "Server1")
-//  val server1 = system.actorOf(Props[Server1].withDeploy(Deploy("akka.tcp://RemoteActorSystem@127.0.0.1:9010/user/Server1")))
+  val map=Map("c"->((new Shared[Integer](2,0)),false));
+  val server1 = system.actorOf(Props(new Server(map)), "Server1")
 
-//  val map2=Map("d"->((new Shared[Integer](1,0)),false));
-//  val server2 = system.actorOf(Props(new Server(map2)), "Server2")
-//  val server2 = system.actorOf(Props(new Server(map2)), "Server2")
-
-  val server1 = system.actorSelection("akka.tcp://RemoteActorSystem@127.0.0.1:9010/user/Server1")
+  val map2=Map("d"->((new Shared[Integer](1,0)),false));
+  val server2 = system.actorOf(Props(new Server(map2)), "Server2")
 
   val future = server1 ? new Read("c")
   val result = Await.result(future, timeout.duration).asInstanceOf[Shared[Integer]]
@@ -49,7 +40,7 @@ object Main extends App {
 //  val future2 = server1 ? new Read("c")
 //  val result2 = Await.result(future2, timeout.duration).asInstanceOf[Int]
 //  println(""+result2)
-/*
+
   val coordinator = system.actorOf(Props[Coordinator])
   val v = Proxy(server1.path.toString, "c")
   val u = Proxy(server2.path.toString, "d")
@@ -65,5 +56,4 @@ object Main extends App {
   }
   Future { txBlock() }
   Future { txBlock() }
-  */
 }
