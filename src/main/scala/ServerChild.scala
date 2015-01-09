@@ -67,7 +67,7 @@ class ServerChild(sentObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) ext
     case (msg:CanCommit) => {
 
       sender ! Yes()
-      context.setReceiveTimeout(500 milliseconds)
+      context.setReceiveTimeout(100 milliseconds)
       context.become(waiting);
     }
     case ReceiveTimeout => {

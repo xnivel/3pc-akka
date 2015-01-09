@@ -12,11 +12,12 @@ class Server extends Actor {
       sender ! (objects(msg.id)._1)
     }
     case (msg: WriteCommit) => {
+      println("received a WriteCommit")
       def WriteChanges: (Map[String, (Shared[Integer], Boolean)], (Proxy, Shared[Integer])) => Map[String, (Shared[Integer], Boolean)] = {
         (result: Map[String, (Shared[Integer], Boolean)], elem: (Proxy, Shared[Integer])) => {
           val idOfVariable = elem._1.variableId
           val nameOfServerVariable = elem._1.serverId
-          if (name == nameOfServerVariable && objects.contains(idOfVariable))
+          if (name == nameOfServerVariable)
             result.updated(idOfVariable, (elem._2, false))
           else
             result
@@ -30,7 +31,7 @@ class Server extends Actor {
         (result: Map[String, (Shared[Integer], Boolean)], elem: (Proxy, Shared[Integer])) => {
           val idOfVariable = elem._1.variableId
           val nameOfServerVariable = elem._1.serverId
-          if (name == nameOfServerVariable && objects.contains(idOfVariable))
+          if (name == nameOfServerVariable)
             result.updated(idOfVariable, (result(idOfVariable)._1, false))
           else
             result
@@ -43,7 +44,7 @@ class Server extends Actor {
         elem => {
           val idOfVariable = elem._1.variableId
           val nameOfServerVariable = elem._1.serverId
-          if (name == nameOfServerVariable && objects.contains(idOfVariable)) {
+          if (name == nameOfServerVariable) {
             !((!objects(idOfVariable)._2) && (objects(idOfVariable)._1.version < elem._2.version))
           }
           else
@@ -54,7 +55,8 @@ class Server extends Actor {
       if(!needToAbort){
         objects = msg.objects.foldLeft(objects)((result: Map[String, (Shared[Integer],Boolean)],elem:(Proxy,Shared[Integer]))=>{
           val idOfVariable=elem._1.variableId
-          if(objects.contains(idOfVariable))
+          val nameOfServerVariable = elem._1.serverId
+          if (name == nameOfServerVariable)
             result.updated(idOfVariable,(result(idOfVariable)._1,true))
           else
             result
