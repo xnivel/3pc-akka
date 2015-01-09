@@ -1,4 +1,4 @@
-import akka.actor.{ActorSelection, ReceiveTimeout, Actor, ActorRef}
+import akka.actor.{ReceiveTimeout, Actor, ActorRef}
 import scala.concurrent.duration._
 
 class CoordinatorChild extends Actor {
