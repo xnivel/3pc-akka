@@ -10,16 +10,18 @@ class Transaction(val system: ActorSystem, val coordinator: ActorRef) {
   implicit val timeout = Timeout(5 seconds)
   var buffer: Map[Proxy, Shared[Integer]] = Map()
   
-  def commit = {
+  def commit: Boolean = {
     val future = coordinator ? CommitRequest(buffer)
     Await.result(future, timeout.duration) match {
-      case Commit() => println("Commited")
-      case Abort() => throw new Exception("Got abort!")
+      case Commit() => {
+        println("Commited")
+        true
+      }
+      case Abort() => {
+        println("Aborted")
+        false
+      }
     }
-  }
-
-  def abort = {
-    println("Aborted")
   }
 
   /**
@@ -51,23 +53,19 @@ object Transaction {
    *
    * val system = ActorSystem("MySystem")
    * val v = Proxy("serverId", "variableId")
-   * transaction(system) { tx =>
-   *   val x = tx.read(v)
-   *   tx.write(v, x + 1)
+   * val coordinator = system.actorSelection(...)
+   * transaction(system, coordinator) { tx =>
+   * val x = tx.read(v)
+   * tx.write(v, x + 1)
    * }
    */
   @tailrec
   def transaction(system: ActorSystem, coordinator: ActorRef)
                  (codeBlock: Transaction => Unit): Unit = {
     val tx = new Transaction(system, coordinator)
-    try {
-      codeBlock(tx)
-      tx.commit
-    } catch {
-      case ex: Throwable => {
-        tx.abort
-        transaction(system, coordinator)(codeBlock)
-      }
-    }
+    codeBlock(tx)
+    val success = tx.commit
+    if (!success)
+      transaction(system, coordinator)(codeBlock)
   }
 }
