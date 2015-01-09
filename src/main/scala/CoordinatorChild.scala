@@ -3,20 +3,19 @@ import scala.concurrent.duration._
 
 class CoordinatorChild extends Actor {
   var requester: ActorRef = _
-  var servers: Set[ActorSelection] = Set()
-  var serverChildren: Set[ActorRef] = Set()
-  var ackCounter = 0
 
   context.setReceiveTimeout(Duration.Undefined)
 
-  def waiting: Receive = {
+  def waiting(nServers: Int, serverChildren: Set[ActorRef] = Set()): Receive = {
     case Yes() => {
       println("dostalem yes")
-      serverChildren = serverChildren + sender()
-      if (serverChildren.size == servers.size) {
+      val newServerChildren = serverChildren + sender()
+      if (newServerChildren.size == nServers) {
         println("poslalem precommit")
-        serverChildren.foreach(c => c ! PreCommit())
-        context.become(prepared)
+        newServerChildren.foreach(c => c ! PreCommit())
+        context.become(prepared(newServerChildren))
+      } else {
+        context.become(waiting(nServers, newServerChildren))
       }
     }
     case No() => {
@@ -31,13 +30,14 @@ class CoordinatorChild extends Actor {
     }
   }
 
-  def prepared: Receive = {
+  def prepared(serverChildren: Set[ActorRef], counter: Int = 0): Receive = {
     case Ack() => {
-      ackCounter += 1
-      if (ackCounter == serverChildren.size) {
+      if (counter + 1 == serverChildren.size) {
         requester ! Commit()
         serverChildren.foreach(c => c ! DoCommit())
         context.stop(self)
+      } else {
+        context.become(prepared(serverChildren, counter + 1))
       }
     }
     case ReceiveTimeout => {
@@ -51,10 +51,10 @@ class CoordinatorChild extends Actor {
     case CommitRequest(objects) => {
       requester = sender()
       val serverIds: Set[String] = objects.keys.map(o => o.serverId).toSet
-      servers = serverIds.map(id => context.actorSelection(id))
+      val servers = serverIds.map(id => context.actorSelection(id))
       servers.foreach(s => s ! CanCommit(objects.toSet))
       context.setReceiveTimeout(500 milliseconds)
-      context.become(waiting)
+      context.become(waiting(servers.size))
     }
   }
 }
