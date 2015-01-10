@@ -46,6 +46,7 @@ class Transaction(val system: ActorSystem, val coordinator: ActorSelection) {
 
 object Transaction {
   val random = new scala.util.Random
+
   /**
    * Usage:
    *
@@ -60,22 +61,18 @@ object Transaction {
    * }
    */
   @tailrec
-  def transaction(system: ActorSystem, coordinator: ActorSelection, loopnr: Int)
+  def transaction(system: ActorSystem,
+                  coordinator: ActorSelection,
+                  loopNo: Int = 1)
                  (codeBlock: Transaction => Unit): Unit = {
     val tx = new Transaction(system, coordinator)
     codeBlock(tx)
     val success = tx.commit
     if (!success)
     {
-      Thread sleep ((random.nextInt(150)+150)*loopnr)
-      transaction(system, coordinator,loopnr+1)(codeBlock)
+      Thread sleep((random.nextInt(150) + 150) * loopNo)
+      transaction(system, coordinator, loopNo + 1)(codeBlock)
 
     }
-  }
-
-  def transaction(system: ActorSystem, coordinator: ActorSelection)
-                 (codeBlock: Transaction => Unit): Unit = {
-    transaction(system, coordinator,1)(codeBlock)
-
   }
 }
