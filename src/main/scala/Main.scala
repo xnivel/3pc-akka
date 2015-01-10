@@ -40,7 +40,7 @@ object Main extends App {
 //  val result2 = Await.result(future2, timeout.duration).asInstanceOf[Int]
 //  println(""+result2)
 
-  val coordinator = system.actorOf(Props[Coordinator])
+  val coordinator = system.actorSelection(system.actorOf(Props[Coordinator]).path)
   val v = Proxy(server1.path.toString, "c")
   val u = Proxy(server2.path.toString, "d")
   val txBlock = () => transaction(system, coordinator) { tx =>

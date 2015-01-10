@@ -1,12 +1,11 @@
-import akka.actor.ActorRef
-import akka.actor.ActorSystem
+import akka.actor.{ActorSelection, ActorSystem}
 import akka.pattern.ask
 import akka.util.Timeout
 import scala.annotation.tailrec
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class Transaction(val system: ActorSystem, val coordinator: ActorRef) {
+class Transaction(val system: ActorSystem, val coordinator: ActorSelection) {
   implicit val timeout = Timeout(5 seconds)
   var buffer: Map[Proxy, Shared[Integer]] = Map()
   
@@ -61,7 +60,7 @@ object Transaction {
    * }
    */
   @tailrec
-  def transaction(system: ActorSystem, coordinator: ActorRef, loopnr: Int)
+  def transaction(system: ActorSystem, coordinator: ActorSelection, loopnr: Int)
                  (codeBlock: Transaction => Unit): Unit = {
     val tx = new Transaction(system, coordinator)
     codeBlock(tx)
@@ -74,7 +73,7 @@ object Transaction {
     }
   }
 
-  def transaction(system: ActorSystem, coordinator: ActorRef)
+  def transaction(system: ActorSystem, coordinator: ActorSelection)
                  (codeBlock: Transaction => Unit): Unit = {
     transaction(system, coordinator,1)(codeBlock)
 
