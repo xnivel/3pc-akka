@@ -20,14 +20,14 @@ class CoordinatorChild extends Actor {
     }
     case No() => {
       println("koordynator no abort")
-      requester ! Abort()
       serverChildren.foreach(c => c ! Abort())
+      requester ! Abort()
       context.stop(self)
     }
     case ReceiveTimeout => {
       println("koordynator timeout abort")
-      requester ! Abort()
       serverChildren.foreach(c => c ! Abort())
+      requester ! Abort()
       context.stop(self)
     }
   }
@@ -43,8 +43,8 @@ class CoordinatorChild extends Actor {
       }
     }
     case ReceiveTimeout => {
-      requester ! Abort()
       serverChildren.foreach(c => c ! Abort())
+      requester ! Abort()
       context.stop(self)
     }
   }
@@ -55,7 +55,7 @@ class CoordinatorChild extends Actor {
       val serverIds: Set[String] = objects.keys.map(o => o.serverId).toSet
       val servers = serverIds.map(id => context.actorSelection(id))
       servers.foreach(s => s ! CanCommit(objects.toSet))
-      context.setReceiveTimeout(100 milliseconds)
+      context.setReceiveTimeout(50 milliseconds)
       context.become(waiting(servers.size))
     }
   }

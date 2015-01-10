@@ -6,10 +6,12 @@ import scala.concurrent.duration._
 
 class ServerChild(sentObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) extends Actor {
   //val objects: Set[(Proxy,Shared[Integer])]=sendedObjects;
-  context.setReceiveTimeout(Duration.Undefined)
+//  context.setReceiveTimeout(Duration.Undefined)
+  context.setReceiveTimeout(50 milliseconds)
+
   def unbecome() = {
-    context.setReceiveTimeout(Duration.Undefined)
-    context.unbecome();
+//    context.setReceiveTimeout(Duration.Undefined)
+//    context.unbecome();
   }
   def Aborting() = {
     println("send a AbortWithList")
@@ -25,10 +27,13 @@ class ServerChild(sentObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) ext
   def waiting: Receive = {
 
     case (msg: PreCommit) => {
+      println("ACK SEND")
       sender ! Ack()
+      context.setReceiveTimeout(50 milliseconds)
       context.become(prepared);
     }
     case Abort() => {
+      println("A1")
       unbecome()
       Aborting()
     }
@@ -49,10 +54,12 @@ class ServerChild(sentObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) ext
       Commiting()
     }
     case Abort => {
+      println("A2")
       unbecome()
       Aborting()
     }
     case ReceiveTimeout => {
+      println("timeout2")
       unbecome()
       Aborting()
     }
@@ -61,19 +68,14 @@ class ServerChild(sentObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) ext
     }
   }
   def receive = {
-    case (name: String) => {
-      println("received a message "+name)
-    }
     case (msg:CanCommit) => {
 
       sender ! Yes()
-      context.setReceiveTimeout(100 milliseconds)
       context.become(waiting);
     }
     case ReceiveTimeout => {
-      println("received a aaaaaaaaaaaaaaa")
+      println("timeout0")
+      Aborting()
     }
-
-    case _ => println("received a messagaes")
   }
 }

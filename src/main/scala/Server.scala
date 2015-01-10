@@ -12,7 +12,7 @@ class Server extends Actor {
       sender ! (objects(msg.id)._1)
     }
     case (msg: WriteCommit) => {
-      println("received a WriteCommit")
+      println("received a WriteCommit "+self.path.name)
       def WriteChanges: (Map[String, (Shared[Integer], Boolean)], (Proxy, Shared[Integer])) => Map[String, (Shared[Integer], Boolean)] = {
         (result: Map[String, (Shared[Integer], Boolean)], elem: (Proxy, Shared[Integer])) => {
           val idOfVariable = elem._1.variableId
@@ -24,6 +24,7 @@ class Server extends Actor {
         }
       }
       objects = msg.objects.foldLeft(objects)(WriteChanges)
+      println("end a WriteCommit "+self.path.name)
     }
     case (msg: AbortWithList) => {
       println("received a AbortWithList")
@@ -61,9 +62,11 @@ class Server extends Actor {
           else
             result
         })
+        println("yes z serwera "+self.path.name)
         val child = context.actorOf(Props(new ServerChild(msg.objects,context.self)))
         child forward msg
       }else{
+        println("no z serwera "+self.path.name)
         sender ! No()
       }
     }
