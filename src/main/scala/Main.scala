@@ -27,10 +27,10 @@ object Main extends App {
   val server2 = system.actorOf(Props(new Server()), "Server2")
 
   val future = server1 ? new Read("c")
-  val result = Await.result(future, timeout.duration).asInstanceOf[Shared[Integer]]
+  val result = Await.result(future, timeout.duration).asInstanceOf[Shared[Int]]
   println(""+result.value)
 
-//  val future2 = server1 ? new CanCommit(Set((new Proxy("c","c"),new Shared[Integer](3,1))))
+//  val future2 = server1 ? new CanCommit(Set((new Proxy("c","c"),new Shared[Int](3,1))))
 //  val result2 = Await.result(future2, timeout.duration).asInstanceOf[Yes]
 //
 //

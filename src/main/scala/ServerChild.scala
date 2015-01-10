@@ -4,8 +4,8 @@
 import akka.actor.{ActorRef, Actor, ReceiveTimeout}
 import scala.concurrent.duration._
 
-class ServerChild(sentObjects:Set[(Proxy,Shared[Integer])],server: ActorRef) extends Actor {
-  //val objects: Set[(Proxy,Shared[Integer])]=sendedObjects;
+class ServerChild(sentObjects:Set[(Proxy,Shared[Int])],server: ActorRef) extends Actor {
+  //val objects: Set[(Proxy,Shared[Int])]=sendedObjects;
 //  context.setReceiveTimeout(Duration.Undefined)
   context.setReceiveTimeout(50 milliseconds)
 

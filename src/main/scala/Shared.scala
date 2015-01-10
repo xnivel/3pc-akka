@@ -1,1 +1,1 @@
-case class Shared[T](value: T,version: Integer)
+case class Shared[T](value: T,version: Int)
