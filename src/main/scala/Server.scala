@@ -13,8 +13,8 @@ class Server extends Actor {
     }
     case (msg: WriteCommit) => {
       println("received a WriteCommit "+self.path.name)
-      def WriteChanges: (Map[String, (Shared[Int], Boolean)], (Proxy, Shared[Int])) => Map[String, (Shared[Int], Boolean)] = {
-        (result: Map[String, (Shared[Int], Boolean)], elem: (Proxy, Shared[Int])) => {
+      def WriteChanges: (Map[String, (Shared[Int], Boolean)], (VarRef, Shared[Int])) => Map[String, (Shared[Int], Boolean)] = {
+        (result: Map[String, (Shared[Int], Boolean)], elem: (VarRef, Shared[Int])) => {
           val idOfVariable = elem._1.variableId
           val nameOfServerVariable = elem._1.serverId
           if (name == nameOfServerVariable)
@@ -28,8 +28,8 @@ class Server extends Actor {
     }
     case (msg: AbortWithList) => {
       println("received a AbortWithList")
-      def AbortCommit: (Map[String, (Shared[Int], Boolean)], (Proxy, Shared[Int])) => Map[String, (Shared[Int], Boolean)] = {
-        (result: Map[String, (Shared[Int], Boolean)], elem: (Proxy, Shared[Int])) => {
+      def AbortCommit: (Map[String, (Shared[Int], Boolean)], (VarRef, Shared[Int])) => Map[String, (Shared[Int], Boolean)] = {
+        (result: Map[String, (Shared[Int], Boolean)], elem: (VarRef, Shared[Int])) => {
           val idOfVariable = elem._1.variableId
           val nameOfServerVariable = elem._1.serverId
           if (name == nameOfServerVariable)
@@ -41,7 +41,7 @@ class Server extends Actor {
       objects = msg.objects.foldLeft(objects)(AbortCommit)
     }
     case (msg: CanCommit) => {
-      def conflicts: ((Proxy, Shared[Int])) => Boolean = {
+      def conflicts: ((VarRef, Shared[Int])) => Boolean = {
         elem => {
           val idOfVariable = elem._1.variableId
           val nameOfServerVariable = elem._1.serverId
@@ -54,7 +54,7 @@ class Server extends Actor {
       }
       val needToAbort = msg.objects.exists(conflicts)
       if(!needToAbort){
-        objects = msg.objects.foldLeft(objects)((result: Map[String, (Shared[Int],Boolean)],elem:(Proxy,Shared[Int]))=>{
+        objects = msg.objects.foldLeft(objects)((result: Map[String, (Shared[Int],Boolean)],elem:(VarRef,Shared[Int]))=>{
           val idOfVariable=elem._1.variableId
           val nameOfServerVariable = elem._1.serverId
           if (name == nameOfServerVariable)

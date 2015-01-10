@@ -13,8 +13,8 @@ object ClientMain extends App {
   val server1Path = "akka.tcp://ServerSystem@127.0.0.1:9001/user/server1"
   val server2Path = "akka.tcp://ServerSystem@127.0.0.1:9002/user/server2"
 
-  val v = Proxy(server1Path, "c")
-  val u = Proxy(server2Path, "d")
+  val v = VarRef(server1Path, "c")
+  val u = VarRef(server2Path, "d")
   val txBlock = () => transaction(system, coordinator) { tx =>
     val x = tx.read(v)
     val y = tx.read(u)

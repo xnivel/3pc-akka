@@ -7,7 +7,7 @@ import scala.concurrent.duration._
 
 class Transaction(val system: ActorSystem, val coordinator: ActorSelection) {
   implicit val timeout = Timeout(5 seconds)
-  var buffer: Map[Proxy, Shared[Int]] = Map()
+  var buffer: Map[VarRef, Shared[Int]] = Map()
   
   def commit: Boolean = {
     val future = coordinator ? CommitRequest(buffer)
@@ -26,7 +26,7 @@ class Transaction(val system: ActorSystem, val coordinator: ActorSelection) {
   /**
    * Read value of object from server
    */
-  def read(p: Proxy): Int = {
+  def read(p: VarRef): Int = {
     val server = system.actorSelection(p.serverId)
     val future = server ? Read(p.variableId)
     val shared = Await.result(future, timeout.duration).
@@ -38,7 +38,7 @@ class Transaction(val system: ActorSystem, val coordinator: ActorSelection) {
   /**
    * Write value of object to local buffer (will be sent on commit)
    */
-  def write(p: Proxy, value: Int): Unit = {
+  def write(p: VarRef, value: Int): Unit = {
     val Shared(_, version) = buffer(p)
     buffer = buffer.updated(p, Shared(value, version + 1))
   }
@@ -52,7 +52,7 @@ object Transaction {
    * import Transaction.transaction
    *
    * val system = ActorSystem("MySystem")
-   * val v = Proxy("serverId", "variableId")
+   * val v = VarRef("akka://sys@host:1234/user/server1", "variableId")
    * val coordinator = system.actorSelection(...)
    * transaction(system, coordinator) { tx =>
    * val x = tx.read(v)

@@ -30,7 +30,7 @@ object Main extends App {
   val result = Await.result(future, timeout.duration).asInstanceOf[Shared[Int]]
   println(""+result.value)
 
-//  val future2 = server1 ? new CanCommit(Set((new Proxy("c","c"),new Shared[Int](3,1))))
+//  val future2 = server1 ? new CanCommit(Set((new VarRef("c","c"),new Shared[Int](3,1))))
 //  val result2 = Await.result(future2, timeout.duration).asInstanceOf[Yes]
 //
 //
@@ -41,8 +41,8 @@ object Main extends App {
 //  println(""+result2)
 
   val coordinator = system.actorSelection(system.actorOf(Props[Coordinator]).path)
-  val v = Proxy(server1.path.toString, "c")
-  val u = Proxy(server2.path.toString, "d")
+  val v = VarRef(server1.path.toString, "c")
+  val u = VarRef(server2.path.toString, "d")
   val txBlock = () => transaction(system, coordinator) { tx =>
     val x = tx.read(v)
     val y = tx.read(u)
