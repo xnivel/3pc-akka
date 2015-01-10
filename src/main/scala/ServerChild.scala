@@ -1,31 +1,21 @@
-/**
- * Created by xnivel on 06.01.15.
- */
 import akka.actor.{ActorRef, Actor, ReceiveTimeout}
 import scala.concurrent.duration._
 
-class ServerChild(sentObjects:Set[(VarRef,Shared[Int])],server: ActorRef) extends Actor {
-  //val objects: Set[(VarRef,Shared[Int])]=sendedObjects;
-//  context.setReceiveTimeout(Duration.Undefined)
+class ServerChild(sentObjects: Set[(VarRef, Shared[Int])], server: ActorRef) extends Actor {
   context.setReceiveTimeout(50 milliseconds)
 
-  def unbecome() = {
-//    context.setReceiveTimeout(Duration.Undefined)
-//    context.unbecome();
-  }
-  def Aborting() = {
+  def aborting() = {
     println("send a AbortWithList")
-    //val proxyList = sentObjects.map(o => o._1)
     server ! new AbortWithList(sentObjects)
     context.stop(self)
   }
-  def Commiting()={
+
+  def committing()={
     server ! new WriteCommit(sentObjects)
     context.stop(self)
   }
 
   def waiting: Receive = {
-
     case (msg: PreCommit) => {
       println("ACK SEND")
       sender ! Ack()
@@ -34,48 +24,43 @@ class ServerChild(sentObjects:Set[(VarRef,Shared[Int])],server: ActorRef) extend
     }
     case Abort() => {
       println("A1")
-      unbecome()
-      Aborting()
+      aborting()
     }
     case ReceiveTimeout => {
       println("timeout1")
-      unbecome()
-      Aborting()
+      aborting()
     }
     case (msg: Any) => {
       println("dostalemcos1 "+msg)
-
     }
   }
+
   def prepared: Receive = {
     case DoCommit() => {
       println("recDoCommit")
-      unbecome()
-      Commiting()
+      committing()
     }
     case Abort => {
       println("A2")
-      unbecome()
-      Aborting()
+      aborting()
     }
     case ReceiveTimeout => {
       println("timeout2")
-      unbecome()
-      Aborting()
+      aborting()
     }
     case (msg: Any) => {
       println("dostalemcos2 "+msg)
     }
   }
+
   def receive = {
     case (msg:CanCommit) => {
-
       sender ! Yes()
       context.become(waiting);
     }
     case ReceiveTimeout => {
       println("timeout0")
-      Aborting()
+      aborting()
     }
   }
 }
