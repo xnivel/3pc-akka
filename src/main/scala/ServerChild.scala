@@ -10,7 +10,7 @@ class ServerChild(sentObjects: Set[(VarRef, Shared[Int])], server: ActorRef) ext
     context.stop(self)
   }
 
-  def committing()={
+  def committing() = {
     server ! new WriteCommit(sentObjects)
     context.stop(self)
   }
